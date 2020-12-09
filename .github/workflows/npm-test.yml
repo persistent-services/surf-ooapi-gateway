@@ -15,4 +15,4 @@ jobs:
         node-version: 15
     - run: npm ci
     - run: npm test
-    - run: npm run-script perf-test.js
+    - run: npm run-script perf-test
