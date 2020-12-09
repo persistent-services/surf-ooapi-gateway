@@ -56,11 +56,15 @@ const performanceTest = async () => {
     rateLimitWindowMs: 1
   })
   console.log('Ready to run')
-  const get = async () => httpGet(gatewayUrl('fred', '/'), {
-    headers: {
-      'X-Route': 'endpoint=OtherTestBackend'
-    }
-  })
+  const get = async (i) => {
+    const res = await httpGet(gatewayUrl('fred', '/'), {
+      headers: {
+        'X-Route': 'endpoint=OtherTestBackend'
+      }
+    })
+    assert.equal(res.statusCode, httpcode.OK)
+    return i
+  }
 
   console.log('Serial requests throughput')
   await timerTest(
@@ -68,10 +72,36 @@ const performanceTest = async () => {
     1000,
     async (numRequests) => {
       for (var i = 0; i < numRequests; i++) {
-        assert.equal((await get()).statusCode, httpcode.OK)
+        await get(i)
       }
     }
   )
+
+  console.log('Requests throughput')
+
+  const tests = [1, 10, 25, 50, 100, 250, 500]
+  do {
+    const concurrency = tests.shift()
+    await timerTest(
+      "concurrently <" + concurrency + ">",
+      1000,
+      async (numRequests) => {
+        const promises = []
+        for (var t = 0; t < concurrency; t++) {
+          promises.push(get(t))
+        }
+        var i = concurrency
+        do {
+          t = await Promise.any(promises)
+          promises[t] = get(t)
+        }
+        while (i++ < numRequests)
+        return Promise.all(promises)
+      }
+    )
+  }
+  while (tests.length > 0)
+
   await down()
 }
 

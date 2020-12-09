@@ -20,7 +20,10 @@
   },
   "dependencies": {
     "express-gateway": "^1.16.10",
-    "express-openapi-validate": "0.5.1",
-    "express-modify-response": "1.0.2"
+    "express-modify-response": "1.0.2",
+    "express-openapi-validate": "0.5.1"
+  },
+  "engines": {
+    "node": ">=15.0.0"
   }
 }
