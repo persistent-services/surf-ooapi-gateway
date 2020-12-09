@@ -68,7 +68,7 @@ const performanceTest = async () => {
 
   console.log('Serial requests throughput')
   await timerTest(
-    "serially",
+    'serially (warmup)',
     1000,
     async (numRequests) => {
       for (var i = 0; i < numRequests; i++) {
@@ -83,7 +83,7 @@ const performanceTest = async () => {
   do {
     const concurrency = tests.shift()
     await timerTest(
-      "concurrently <" + concurrency + ">",
+      'concurrently <' + concurrency + '>',
       1000,
       async (numRequests) => {
         const promises = []

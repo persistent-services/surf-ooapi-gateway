@@ -96,12 +96,13 @@ module.exports = {
       .fromDockerfile(composeFilePath, composeFile)
       .build()
 
+    console.log('setting rate limiter to %d / %d ms', rateLimitMax || RATE_LIMIT_MAX, rateLimitWindowMs || RATE_LIMIT_WINDOW_MS)
     container = await image
       .withEnv('OOAPI_TEST_BACKEND_URL', TEST_BACKEND_CONTAINER_URL)
       .withEnv('OOAPI_OTHER_TEST_BACKEND_URL', OTHER_TEST_BACKEND_CONTAINER_URL)
       .withEnv('MOCK_OAUTH_TOKEN_URL', MOCK_OAUTH_TOKEN_CONTAINER_URL)
       .withEnv('RATE_LIMIT_MAX', rateLimitMax || RATE_LIMIT_MAX)
-      .withEnv('RATE_LIMIT_WINDOW_MS', rateLimitWindowMs || -RATE_LIMIT_WINDOW_MS)
+      .withEnv('RATE_LIMIT_WINDOW_MS', rateLimitWindowMs || RATE_LIMIT_WINDOW_MS)
       .withEnv('LOG_LEVEL', process.env.LOG_LEVEL || 'info')
       .withWaitStrategy(Wait.forLogMessage('gateway https server listening'))
       .withExposedPorts(8080, 4444)
