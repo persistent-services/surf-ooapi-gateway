@@ -59,7 +59,7 @@ const performanceTest = async () => {
   const get = async (i) => {
     const res = await httpGet(gatewayUrl('fred', '/'), {
       headers: {
-        'X-Route': 'endpoint=OtherTestBackend'
+        'X-Route': 'endpoint=TestBackend,OtherTestBackend'
       }
     })
     assert.equal(res.statusCode, httpcode.OK)
