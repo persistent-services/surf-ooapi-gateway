@@ -109,8 +109,8 @@ pipelines:
 
       - rate-limit:
           - action:
-              max: 10
-              windowMs: 1000
+              max: ${RATE_LIMIT_MAX:-10}
+              windowMs: ${RATE_LIMIT_WINDOW_MS:-1000}
 
       - gatekeeper:
           - action:

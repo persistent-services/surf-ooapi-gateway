@@ -31,6 +31,8 @@ const OTHER_TEST_BACKEND_CONTAINER_URL = 'http://host.testcontainers.internal:80
 const OTHER_TEST_BACKEND_URL = 'http://localhost:8083/ooapi/'
 const MOCK_OAUTH_TOKEN_CONTAINER_URL = 'http://host.testcontainers.internal:8084/mock/token'
 const MOCK_OAUTH_TOKEN_URL = 'http://localhost:8084/mock/token'
+const RATE_LIMIT_MAX = 10
+const RATE_LIMIT_WINDOW_MS = 1000
 
 // As reflected in config/credentials.json.test
 const testCredentials = {
@@ -79,7 +81,7 @@ const httpPost = (url, { params, ...opts }) => {
 }
 
 module.exports = {
-  up: async () => {
+  up: async ({ rateLimitMax, rateLimitWindowMs }) => {
     if (skipTest) return
 
     testBackend = require('../scripts/test-backend')
@@ -98,6 +100,8 @@ module.exports = {
       .withEnv('OOAPI_TEST_BACKEND_URL', TEST_BACKEND_CONTAINER_URL)
       .withEnv('OOAPI_OTHER_TEST_BACKEND_URL', OTHER_TEST_BACKEND_CONTAINER_URL)
       .withEnv('MOCK_OAUTH_TOKEN_URL', MOCK_OAUTH_TOKEN_CONTAINER_URL)
+      .withEnv('RATE_LIMIT_MAX', rateLimitMax || RATE_LIMIT_MAX)
+      .withEnv('RATE_LIMIT_WINDOW_MS', rateLimitWindowMs || -RATE_LIMIT_WINDOW_MS)
       .withEnv('LOG_LEVEL', process.env.LOG_LEVEL || 'info')
       .withWaitStrategy(Wait.forLogMessage('gateway https server listening'))
       .withExposedPorts(8080, 4444)
