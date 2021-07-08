@@ -211,14 +211,16 @@
 
 ** Logging
 
-   Request logging is implemented using the standard [[https://www.express-gateway.io/docs/policies/log/][EG log policy]] in
-   [[./config/gateway.config.yml]]
+   Request logging according to the [[https://docs.graylog.org/en/3.3/pages/gelf.html][GELF format]] is implemented using
+   the ~lifecycle-logger~ policy, which logs to STDOUT.
 
    #+begin_src yaml
-      - log:
+      - lifecycle-logger:
           - action:
-              message: ${req.egContext.requestID} ${req.method} ${req.originalUrl}
    #+end_src
+
+   Logging of outgoing requests to the backends is built in to the
+   aggregation policy.
 
 ** Rate limiting
 

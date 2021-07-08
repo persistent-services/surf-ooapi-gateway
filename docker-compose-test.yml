@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  gateway:
+    build: .
+    ports:
+      - "8081:8080"
+    environment:
+      OOAPI_TEST_BACKEND_URL: http://test-backend/
+    links:
+      - redis
+      - test-backend
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: docker.gateway
+
+  test-backend:
+    build:
+      context: test-backend
+    ports:
+      - "8888:80"
+
+  redis:
+    image: redis

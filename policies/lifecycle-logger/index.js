@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 SURFnet B.V.
+/* Copyright (C) 2021 SURFnet B.V.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -14,15 +14,14 @@
  * with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-const path = require('path')
-const gateway = require('express-gateway')
+module.exports = {
+  name: 'lifecycle-logger',
 
-const policies = require('express-gateway/lib/policies')
-policies.register(require('./policies/lifecycle-logger'))
-policies.register(require('./policies/gatekeeper'))
-policies.register(require('./policies/openapi-validator'))
-policies.register(require('./policies/aggregation'))
+  schema: {
+    $id: 'http://express-gateway.io/schemas/policies/surfnet-ooapi-gw-lifecylce-logger.json',
+    type: 'object',
+    required: []
+  },
 
-gateway()
-  .load(path.join(__dirname, 'config'))
-  .run()
+  policy: require('./logger.js')
+}

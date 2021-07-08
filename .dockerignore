@@ -1,0 +1,9 @@
+**
+!config
+!lib
+!*.js
+!policies
+!*.json
+!node_modules
+
+

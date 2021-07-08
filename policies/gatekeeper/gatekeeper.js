@@ -51,6 +51,7 @@ module.exports = (params, config) => {
 
   return (req, res, next) => {
     const app = authentication.appFromRequest(req, params.apps)
+    req.egContext.app = app
     delete req.headers.authorization
 
     if (app) {

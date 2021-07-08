@@ -91,7 +91,7 @@ policies:
   - cors
   - expression
   - key-auth
-  - log
+  - lifecycle-logger
   - oauth2
   - proxy
   - rate-limit
@@ -105,9 +105,7 @@ pipelines:
     apiEndpoints:
       - api
     policies:
-      - log:
-          - action:
-              message: ${req.egContext.requestID} ${req.method} ${req.originalUrl}
+      - lifecycle-logger:
 
       - rate-limit:
           - action:
@@ -115,7 +113,6 @@ pipelines:
               windowMs: ${RATE_LIMIT_WINDOW_MS:-1000}
               delayAfter: ${RATE_LIMIT_DELAY_AFTER:-5}
               delayMs: ${RATE_LIMIT_DELAY_MS:-500}
-
 
       - gatekeeper:
           - action:
@@ -181,3 +178,4 @@ pipelines:
               keepResponseHeaders:
                 - 'content-type'
                 - 'content-length'
+

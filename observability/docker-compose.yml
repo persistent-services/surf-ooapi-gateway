@@ -1,0 +1,103 @@
+version: "3.9"
+services:
+
+  # sonar:  # send a test message to be passed to Graylog every 5 seconds
+  #   image: ubuntu
+  #   entrypoint: |
+  #     /usr/bin/bash  -c 'while true; do echo "{\"short_message\": \"pong\", \"host\": \"foo\", \"level\": 3}"; sleep 5; done'
+  #   logging:
+  #     driver: "fluentd"
+  #     options:
+  #       tag: docker.sonar
+  #   depends_on:
+  #     # ensure we don't try to start logging before fluentd
+  #     # (below) is started
+  #     fluentd:
+  #       condition: "service_started"
+
+#
+# Logging from docker is forwarded to Graylog.
+#
+# The UI for Graylog is at http://localhost:9000/ and you can log
+# in with username: admin password: admin
+#
+
+  graylog:
+    image: "graylog/graylog:4.1"
+    entrypoint: "/usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh"
+    ports:
+      - "5044:5044/tcp"   # Beats
+      - "5140:5140/udp"   # Syslog
+      - "5140:5140/tcp"   # Syslog
+      - "5555:5555/tcp"   # RAW TCP
+      - "5555:5555/udp"   # RAW TCP
+      - "9000:9000/tcp"   # Server API
+      - "12201:12201/tcp" # GELF TCP
+      - "12201:12201/udp" # GELF UDP
+      - "13301:13301/tcp" # Forwarder data
+      - "13302:13302/tcp" # Forwarder config
+    links:
+      - mongo
+      - elasticsearch
+    depends_on:
+      elasticsearch:
+        condition: "service_started"
+      mongo:
+        condition: "service_started"
+    environment:
+      GRAYLOG_NODE_ID_FILE: "/usr/share/graylog/data/config/node-id"
+      GRAYLOG_HTTP_BIND_ADDRESS: "0.0.0.0:9000"
+      GRAYLOG_HTTP_EXTERNAL_URI: "http://localhost:9000/"
+      GRAYLOG_ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+      GRAYLOG_MONGODB_URI: "mongodb://mongo:27017/graylog"
+    volumes:
+      - "graylog_data:/usr/share/graylog/data/data"
+      - "graylog_journal:/usr/share/graylog/data/journal"
+    restart: "always"
+
+# Graylog needs mongodb and elasticsearch
+
+  mongo:
+    image: "mongo:4.2"
+    volumes:
+      - "mongo_data:/data/db"
+    restart: "always"
+
+  elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2"
+    environment:
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      bootstrap.memory_lock: "true"
+      discovery.type: "single-node"
+      http.host: "0.0.0.0"
+      action.auto_create_index: "false"
+    image: "docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2"
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+    volumes:
+      - "elasticsearch_data:/usr/share/elasticsearch/data"
+    restart: "always"
+
+# We use fluentbit to collect logs from docker and forward to Graylog
+#
+# In production the fluentbit collector is running on the VM instead
+# of in docker
+
+  fluentd:
+    image: fluent/fluent-bit:1.8
+    command: /fluent-bit/bin/fluent-bit -c /fluent-bit/etc/td-agent-bit.conf
+    volumes:
+      - ./fluentconfig:/fluent-bit/etc
+    ports:
+      - "24224:24224"
+      - "2020:2020"
+    links:
+      - graylog
+
+volumes:
+  elasticsearch_data:
+  mongo_data:
+  graylog_data:
+  graylog_journal:
